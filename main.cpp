@@ -19,7 +19,5 @@ int main(int argc, char *argv[])
     namedWindow("Imagen",WINDOW_AUTOSIZE);
     imshow("Imagen",img);*/
 
-
-
     return a.exec();
 }

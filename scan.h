@@ -13,7 +13,6 @@
 using namespace std;
 using namespace cv;
 
-
 class Scan
 {
 public:
@@ -21,7 +20,6 @@ public:
     vector<Mat> listFrames;
 
 private:
-
 
 };
 

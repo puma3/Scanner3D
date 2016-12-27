@@ -20,7 +20,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 void MainWindow::startCamera()
 {
-    capWebCam.open(0);
+    capWebCam.open(1);
     if(capWebCam.isOpened()==false)
     {
         cout<<"Error"<<endl;
@@ -44,6 +44,15 @@ void MainWindow::on_actionCapture()
 
     cvtColor(matOriginal,matOriginal,CV_BGR2RGB);
     QImage img=QImage((uchar*) matOriginal.data, matOriginal.cols, matOriginal.rows, matOriginal.step, QImage::Format_RGB888);
+    uint w = img.width() / 2,
+         h;
+    for(h = 0; h < img.height(); ++h) {
+        img.setPixel(w, h, 0x0fc);
+    }
+    h = img.height() * 9 / 10;
+    for(w = 0; w < img.width(); ++w) {
+        img.setPixel(w, h, 0x0fc);
+    }
     ui->camera->setPixmap(QPixmap::fromImage(img));
 }
 
