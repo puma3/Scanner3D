@@ -3,6 +3,8 @@
 #include "scan.h"
 #include <QTimer>
 #include <QMainWindow>
+#include <QPainter>
+
 using namespace std;
 using namespace cv;
 
