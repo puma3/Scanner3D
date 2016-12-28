@@ -6,21 +6,21 @@
 
 QT       += core gui
 
-CONFIG +=c++11
+CONFIG += c++11
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
 TARGET = Scanner3D
 TEMPLATE = app
 
-INCLUDEPATH += /usr/local/include/opencv
-LIBS += `pkg-config --libs opencv`
+INCLUDEPATH +=  /usr/local/include/opencv
+LIBS        +=  `pkg-config --libs opencv`
 
-SOURCES += main.cpp\
-        mainwindow.cpp \
-    scan.cpp
+SOURCES +=  main.cpp\
+            mainwindow.cpp \
+            scan.cpp
 
 HEADERS  += mainwindow.h \
-    scan.h
+            scan.h
 
 FORMS    += mainwindow.ui

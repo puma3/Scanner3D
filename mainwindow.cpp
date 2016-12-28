@@ -24,7 +24,7 @@ MainWindow::MainWindow(QWidget *parent) :
 void MainWindow::startCamera()
 {
     capWebCam.open(0);
-    if(capWebCam.isOpened()==false)
+    if(!capWebCam.isOpened())
     {
         cout<<"Error"<<endl;
         return;
@@ -48,16 +48,15 @@ void MainWindow::on_actionCapture()
     cvtColor(matOriginal,matOriginal,CV_BGR2RGB);
     QImage img=QImage((uchar*) matOriginal.data, matOriginal.cols, matOriginal.rows, matOriginal.step, QImage::Format_RGB888);
 
-    int w = img.width() / 2,
-        h = img.height() * 9 / 10;
-
     //Inicializamos el Painter
     QPainter painter;
     painter.begin(&img);
     painter.setCompositionMode(QPainter::RasterOp_SourceXorDestination);
-    painter.setPen(QColor(0x00, 0xff, 0x00));
+    painter.setPen(QColor(0x11, 0xff, 0x22));
 
     //Dibujamos las lineas guia
+    int w = img.width() / 2,
+        h = img.height() * 9 / 10;
     painter.drawLine(w, 0, w, img.height());
     painter.drawLine(0, h, img.width(), h);
 
