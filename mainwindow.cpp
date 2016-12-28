@@ -12,12 +12,9 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    //std::thread thread1(startCamera);
-    //thread1.join();
 
-    //std::thread t(&MainWindow::test,this);
-
-    startCamera();
+    std::thread t(&MainWindow::startCamera,this);
+        t.join();
 
 }
 
