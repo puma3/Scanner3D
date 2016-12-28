@@ -4,7 +4,8 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
+QT       += core gui \
+            serialport
 
 CONFIG += c++11
 
@@ -18,9 +19,11 @@ LIBS        +=  `pkg-config --libs opencv`
 
 SOURCES +=  main.cpp\
             mainwindow.cpp \
-            scan.cpp
+            scan.cpp \
+    worker.cpp
 
 HEADERS  += mainwindow.h \
-            scan.h
+            scan.h \
+    worker.h
 
 FORMS    += mainwindow.ui

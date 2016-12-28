@@ -4,6 +4,11 @@
 #include <QTimer>
 #include <QMainWindow>
 #include <QPainter>
+#include <QtSerialPort/QSerialPort>
+#include <QtSerialPort/QSerialPortInfo>
+#include <QDebug>
+#include <QThread>
+#include "worker.h"
 
 using namespace std;
 using namespace cv;
@@ -22,15 +27,17 @@ public:
 
     void start();
     void startCamera();
+    void initThread();
+    void initSerial();
 
     VideoCapture capWebCam;
     QTimer * Timer;
+    uint iterator;
 
-private slots:
+protected slots:
     void on_actionCapture();
 
-
-private:
+protected:
     Ui::MainWindow *ui;
 
     Mat matProcessed;
@@ -38,8 +45,6 @@ private:
 
     QImage qimgOriginal;
     QImage qimgProcessed;
-
-
 };
 
 #endif // MAINWINDOW_H
