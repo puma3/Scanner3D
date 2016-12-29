@@ -9,6 +9,7 @@
 #include <QDebug>
 #include <QThread>
 #include "worker.h"
+#include "renderer.h"
 
 using namespace std;
 using namespace cv;
@@ -26,13 +27,19 @@ public:
     ~MainWindow();
 
     void start();
+
     void startCamera();
-    void initThread();
+
+//    void initThread();
+
     void initSerial();
 
     VideoCapture capWebCam;
     QTimer * Timer;
     uint iterator;
+
+private:
+    Renderer *rndr;
 
 protected slots:
     void on_actionCapture();
@@ -45,6 +52,9 @@ protected:
 
     QImage qimgOriginal;
     QImage qimgProcessed;
+
+private slots:
+    void on_pushButton_2_clicked();
 };
 
 #endif // MAINWINDOW_H

@@ -20,10 +20,13 @@ LIBS        +=  `pkg-config --libs opencv`
 SOURCES +=  main.cpp\
             mainwindow.cpp \
             scan.cpp \
-    worker.cpp
+    worker.cpp \
+    renderer.cpp
 
 HEADERS  += mainwindow.h \
             scan.h \
-    worker.h
+    worker.h \
+    renderer.h
 
-FORMS    += mainwindow.ui
+FORMS    += mainwindow.ui \
+    renderer.ui

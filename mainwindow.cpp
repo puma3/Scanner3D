@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#define _NO_WEBCAM_
+
 using namespace std;
 using namespace cv;
 
@@ -16,14 +18,13 @@ MainWindow::MainWindow(QWidget *parent) :
 {
     ui->setupUi(this);
 
-    //std::thread thread1(startCamera);
-    //thread1.join();
+    rndr = new Renderer(this);
+#ifdef _NO_WEBCAM_
+    rndr->show();
+#endif
 
-    //Inicializar la comunicacion serial
-//    std::thread t(&MainWindow::startCamera, this);
-//    initThread();
     startCamera();
-    initSerial();
+    initSerial();               //Inicializar la comunicacion serial
 
 //    QThread* thread = new QThread;
 //    Worker* worker = new Worker();
@@ -37,14 +38,18 @@ MainWindow::MainWindow(QWidget *parent) :
 //    thread->start();
 }
 
-void MainWindow::initThread()
-{
-//    t.join();
-}
+//void MainWindow::initThread()
+//{
+////    t.join();
+//}
 
 void MainWindow::startCamera()
 {
+#ifndef _NO_WEBCAM_
     capWebCam.open(1);
+#else
+    capWebCam.open(0);
+#endif
     if(!capWebCam.isOpened())
     {
         cout<<"Error"<<endl;
@@ -53,39 +58,42 @@ void MainWindow::startCamera()
 
     Timer = new QTimer(this);
     connect(Timer, SIGNAL(timeout()),this, SLOT(on_actionCapture()));
+#ifndef _NO_WEBCAM_
     Timer->start(1000);
-//    Timer->start();
+#else
+    Timer->start(10);
+#endif
 }
 
 void MainWindow::initSerial()
 {
-    QSerialPortInfo info("usbmodem621");
-    // Check info of the port
-    qDebug() << "Name        : " << info.portName();
-    qDebug() << "Manufacturer: " << info.manufacturer(); //if showing manufacturer, means Qstring &name is good
-    qDebug() << "Busy: " << info.isBusy() << endl;
+//    QSerialPortInfo info("usbmodem621");
+//    // Check info of the port
+//    qDebug() << "Name        : " << info.portName();
+//    qDebug() << "Manufacturer: " << info.manufacturer(); //if showing manufacturer, means Qstring &name is good
+//    qDebug() << "Busy: " << info.isBusy() << endl;
 
-    // Initialize Serial
-    QSerialPort serial;
-    serial.setPortName("usbmodem621");
-    serial.open(QIODevice::ReadWrite);
-    serial.setBaudRate(QSerialPort::Baud9600);
-    serial.setDataBits(QSerialPort::Data8);
-    serial.setParity(QSerialPort::NoParity);
-    serial.setStopBits(QSerialPort::OneStop);
-    serial.setFlowControl(QSerialPort::NoFlowControl);
+//    // Initialize Serial
+//    QSerialPort serial;
+//    serial.setPortName("usbmodem621");
+//    serial.open(QIODevice::ReadWrite);
+//    serial.setBaudRate(QSerialPort::Baud9600);
+//    serial.setDataBits(QSerialPort::Data8);
+//    serial.setParity(QSerialPort::NoParity);
+//    serial.setStopBits(QSerialPort::OneStop);
+//    serial.setFlowControl(QSerialPort::NoFlowControl);
 
-    if (serial.isOpen() && serial.isWritable()) {
-        QByteArray ba("R");
-        serial.write(ba);
-        serial.flush();
-        qDebug() << "data has been send" << endl;
-        serial.close();
-    }
+//    if (serial.isOpen() && serial.isWritable()) {
+//        QByteArray ba("R");
+//        serial.write(ba);
+//        serial.flush();
+//        qDebug() << "data has been send" << endl;
+//        serial.close();
+//    }
 
-    else {
-        qDebug() << "An error occured" << endl;
-    }
+//    else {
+//        qDebug() << "An error occured" << endl;
+//    }
 }
 
 
@@ -93,7 +101,9 @@ void MainWindow::on_actionCapture()
 {
 
     capWebCam >> matOriginal;
-//    for(;;)
+
+#ifndef _NO_WEBCAM_
+    //Escribir a archivo
     {
         Mat frame;
         capWebCam >> frame;
@@ -101,6 +111,7 @@ void MainWindow::on_actionCapture()
         QString path = "output/scan" + QString::number(iterator++) + ".jpg";
         imwrite(path.toStdString(), frame );
     }
+#endif
 
     cvtColor(matOriginal,matOriginal,CV_BGR2RGB);
     QImage img=QImage((uchar*) matOriginal.data, matOriginal.cols, matOriginal.rows, matOriginal.step, QImage::Format_RGB888);
@@ -109,7 +120,7 @@ void MainWindow::on_actionCapture()
     QPainter painter;
     painter.begin(&img);
     painter.setCompositionMode(QPainter::RasterOp_SourceXorDestination);
-    painter.setPen(QColor(0x11, 0xff, 0x22));
+    painter.setPen(QColor(0x33, 0xff, 0x33));
 
     //Dibujamos las lineas guia
     int w = img.width() / 2,
@@ -117,6 +128,7 @@ void MainWindow::on_actionCapture()
     painter.drawLine(w, 0, w, img.height());
     painter.drawLine(0, h, img.width(), h);
 
+    //Mandar imagen a label: camera
     ui->camera->setPixmap(QPixmap::fromImage(img));
 }
 
@@ -125,5 +137,9 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-
-
+void MainWindow::on_pushButton_2_clicked() //Mesh rendering button
+{
+#ifndef _NO_WEBCAM_
+    rndr->show();
+#endif
+}
