@@ -15,18 +15,23 @@ TARGET = Scanner3D
 TEMPLATE = app
 
 INCLUDEPATH +=  /usr/local/include/opencv
-LIBS        +=  `pkg-config --libs opencv`
+LIBS        +=  `pkg-config --libs opencv` \
+                -lglut -lGLU
 
 SOURCES +=  main.cpp\
             mainwindow.cpp \
             scan.cpp \
     worker.cpp \
-    renderer.cpp
+    renderer.cpp \
+    pointcloud.cpp \
+    oglwidget.cpp
 
 HEADERS  += mainwindow.h \
             scan.h \
     worker.h \
-    renderer.h
+    renderer.h \
+    pointcloud.h \
+    oglwidget.h
 
 FORMS    += mainwindow.ui \
     renderer.ui
