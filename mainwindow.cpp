@@ -46,6 +46,7 @@ MainWindow::MainWindow(QWidget *parent) :
 void MainWindow::startCamera()
 {
 #ifndef _NO_WEBCAM_
+//#ifdef _NO_WEBCAM_
     capWebCam.open(1);
 #else
     capWebCam.open(0);
@@ -104,13 +105,11 @@ void MainWindow::on_actionCapture()
 
 #ifndef _NO_WEBCAM_
     //Escribir a archivo
-    {
-        Mat frame;
-        capWebCam >> frame;
-        scan.listFrames.push_back(frame);
-        QString path = "output/scan" + QString::number(iterator++) + ".jpg";
-        imwrite(path.toStdString(), frame );
-    }
+    Mat frame;
+    capWebCam >> frame;
+    scan.listFrames.push_back(frame);
+    QString path = "output/scan" + QString::number(iterator++) + ".jpg";
+    imwrite(path.toStdString(), frame );
 #endif
 
     cvtColor(matOriginal,matOriginal,CV_BGR2RGB);

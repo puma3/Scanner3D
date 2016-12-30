@@ -23,7 +23,6 @@ public:
 
     void push_back(float _x, float _y, float _z);
 
-private:
     vector<Point3D> cloud;
 };
 

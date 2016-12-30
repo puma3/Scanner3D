@@ -7,6 +7,10 @@
 //#include <GL/gl.h>
 #include <GL/freeglut.h>
 #include "pointcloud.h"
+#include <iostream>
+#include <QDebug>
+
+using namespace std;
 
 class OGLWidget : public QOpenGLWidget
 {
@@ -15,16 +19,9 @@ public:
     OGLWidget(QWidget *parent = 0);
     ~OGLWidget();
 
-    void drawCircle();
-    void drawPolygon(int n, float r);
-    void drawLine(float p1_x, float p1_y, float p2_x, float p2_y);
+    void setPointCloud(PointCloud *ptr);
 
-    int n1,
-        n2;
-    float x1,
-          y1,
-          x2,
-          y2;
+    PointCloud *cloud;
 
 protected:
     void initializeGL();

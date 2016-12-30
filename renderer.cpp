@@ -7,6 +7,7 @@ Renderer::Renderer(QWidget *parent) :
     iterator(0)
 {
     ui->setupUi(this);
+    ui->openGLWidget->setPointCloud(&points);
     setFrameSize(640, 480);
     setAngles(45.0, 5.14286);
     frameBrightestPixels();
@@ -31,16 +32,20 @@ void Renderer::setAngles(float _laserAngle, float _stepAngle)
 {
     laserAngle = _laserAngle * 3.1416 / 180;
     stepAngle = _stepAngle * 3.1416 / 180;
+//    stepAngle = 2 * 3.1416 / 70;
 }
 
 void Renderer::frameBrightestPixels()
 {
+    for(int it = 5; it < 72; ++it) {
     //Obtener imagen desde OpenCV
     Mat currentMat,
         transformationMat;
-    currentMat = imread("output/scan40.jpg", CV_LOAD_IMAGE_COLOR);
+    QString path = "output/scan" + QString::number(it) + ".jpg"; /////////Debug
+//    QString path = "output/scan40.jpg"; /////////Debug
+    currentMat = imread(path.toStdString(), CV_LOAD_IMAGE_COLOR);
 
-    transformationMat = imread("output/scan40.jpg", CV_LOAD_IMAGE_COLOR);
+    transformationMat = imread(path.toStdString(), CV_LOAD_IMAGE_COLOR);
 
     threshold(transformationMat, transformationMat, 240, 255, 3);
     cvtColor(transformationMat, transformationMat, CV_BGR2HLS);    //Imagen en HLS
@@ -72,22 +77,23 @@ void Renderer::frameBrightestPixels()
     //Mandar imagen a label: lbl_Pic
     ui->lbl_Pic->setPixmap(QPixmap::fromImage(img));
 
-    emit finishedPixelCalculation();
+//    emit finishedPixelCalculation();
+    processSlice();
+    }
 }
 
 void Renderer::processSlice()
 {
     float dAngle = stepAngle * iterator++,
-          dx, dz, x, y, z;
+          dx, dz, x, z;
     for (int i=0; i < height ; i++) {
         dx = brightestPixls[i] - middle_x;
         dz = dx / sin(laserAngle);
 
-        x = dz * sin(dAngle);
-        y = i;
-        z = dz * cos(dAngle);
+        x = dz * cos(dAngle);
+        z = dz * sin(dAngle);
 
-        points.push_back(x, y, z);
+        points.push_back(x, height - i * 1.0, z);
     }
 
     emit finishedSliceProcessing();
