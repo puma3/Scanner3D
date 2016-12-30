@@ -21,19 +21,9 @@ void Renderer::brightestPixels()
         transformationMat;
     currentMat = imread("output/scan40.jpg", CV_LOAD_IMAGE_COLOR);
 
-    transformationMat = currentMat;
-//    cvtColor(currentMat, transformationMat, CV_BGR2GRAY);    //Imagen en HLS
-//    threshold(transformationMat, transformationMat, 240, 255, 3);
-//    equalizeHist( transformationMat, transformationMat);
+    transformationMat = imread("output/scan40.jpg", CV_LOAD_IMAGE_COLOR);
+    threshold(transformationMat, transformationMat, 240, 255, 3);
 
-//    //Reducir la saturacion
-//    for (int i=0; i < transformationMat.rows ; i++)
-//        for(int j=0; j < transformationMat.cols; j++)
-//            transformationMat.at<cv::Vec3b>(i,j)[1] = 50;
-
-
-
-//    cvtColor(transformationMat, transformationMat, CV_GRAY2BGR);
     cvtColor(transformationMat, transformationMat, CV_BGR2HLS);    //Imagen en HLS
 
     //Procesar pixel mas brillante para cada Y
@@ -46,7 +36,7 @@ void Renderer::brightestPixels()
     }
 
     //Imagen en RGB
-    cvtColor(transformationMat, currentMat, CV_HLS2RGB);
+    cvtColor(currentMat, currentMat, CV_BGR2RGB);
 
     //Load image using QImage
     QImage img = QImage((uchar*) currentMat.data,
