@@ -2,6 +2,7 @@
 #define RENDERER_H
 
 #include <QDialog>
+#include <QDebug>
 #include "scan.h"
 
 namespace Ui {
