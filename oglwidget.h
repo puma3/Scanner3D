@@ -23,9 +23,10 @@ public:
 
     PointCloud *cloud;
 
+    void resizeGL(int w, int h);
+
 protected:
     void initializeGL();
-    void resizeGL(int w, int h);
     void paintGL();
 };
 

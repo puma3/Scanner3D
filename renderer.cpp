@@ -7,9 +7,9 @@ Renderer::Renderer(VideoCapture *capturer, int *_brightestPixls, QWidget *parent
     QDialog(parent),
     ui(new Ui::Renderer),
     capWebCam(capturer),
+    iterator(0),
     brightestPixls(_brightestPixls),
-    timer(this),
-    iterator(0)
+    timer(this)
 {
     ui->setupUi(this);
     ui->openGLWidget->setPointCloud(&points);
@@ -40,11 +40,10 @@ void Renderer::captureFrames(int n, int rate) {
     n_frames = n;
     iterator = 0;
     qDebug() << "Will capture" << n_frames << "frames at" << rate << "ms";
-#ifndef _WORKING_WITH_FILES_
-    connect(&timer, SIGNAL(timeout()), this, SLOT(frameBrightestPixels()));
-#else
+#ifdef _WORKING_WITH_FILES_
     frameBrightestPixels_();
 #endif
+    connect(&timer, SIGNAL(timeout()), this, SLOT(frameBrightestPixels()));
     timer.start(rate);
 }
 
@@ -93,23 +92,22 @@ void Renderer::frameBrightestPixels_()
 
     //Imagen en RGB
 //    cvtColor(transformationMat, currentMat, CV_HLS2RGB);
-    cvtColor(currentMat, currentMat, CV_BGR2RGB);
+//    cvtColor(currentMat, currentMat, CV_BGR2RGB);
 
-    //Load image using QImage
-    QImage img = QImage((uchar*) currentMat.data,
-                        currentMat.cols,
-                        currentMat.rows,
-                        currentMat.step,
-                        QImage::Format_RGB888);
+//    //Load image using QImage
+//    QImage img = QImage((uchar*) currentMat.data,
+//                        currentMat.cols,
+//                        currentMat.rows,
+//                        currentMat.step,
+//                        QImage::Format_RGB888);
 
-    //Escribir sobre pixels mas brillantes
-    for (int i=0; i < height ; i++)
-        img.setPixel(brightestPixls[i], i, qRgb(0, 0, 255));
+//    //Escribir sobre pixels mas brillantes
+//    for (int i=0; i < height ; i++)
+//        img.setPixel(brightestPixls[i], i, qRgb(0, 0, 255));
 
-    //Mandar imagen a label: lbl_Pic
-    ui->lbl_Pic->setPixmap(QPixmap::fromImage(img));
+//    //Mandar imagen a label: lbl_Pic
+//    ui->lbl_Pic->setPixmap(QPixmap::fromImage(img));
 
-//    emit finishedPixelCalculation();
     processSlice();
     }
 }
@@ -134,6 +132,10 @@ void Renderer::processSlice()
 
         points.push_back(x, height - i * 1.0, -z);
     }
+
+#ifndef _WORKING_WITH_FILES_
+    ui->openGLWidget->update();
+#endif
 
     emit finishedSliceProcessing();
 }

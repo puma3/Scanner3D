@@ -58,17 +58,6 @@ void OGLWidget::paintGL()
 {
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-/////TRIANGLE
-//    glBegin(GL_TRIANGLES);
-//        glColor3f(1.0, 0.0, 0.0);
-//        glVertex3f(-0.5, -0.5, 0);
-//        glColor3f(0.0, 1.0, 0.0);
-//        glVertex3f( 0.5, -0.5, 0);
-//        glColor3f(0.0, 0.0, 1.0);
-//        glVertex3f( 0.0,  0.5, 0);
-//    glEnd();
-
-    qDebug() << cloud->cloud.size();
     glBegin(GL_POINTS);
         for (auto it = cloud->cloud.begin(); it != cloud->cloud.end(); ++it)
             glVertex3f(it->x, it->y, it->z);
