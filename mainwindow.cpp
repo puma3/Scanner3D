@@ -29,19 +29,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(rndr, SIGNAL(finishedPixelCalculation()), this, SLOT(highlight_bright_pixels()));
     rndr->setFrameSize(width, height);
     initSerial();               //Inicializar la comunicacion serial
-
-    {
-//    QThread* thread = new QThread;
-//    Worker* worker = new Worker();
-//    worker->setup(this, &capWebCam);
-//    worker->moveToThread(thread);
-////    connect(worker, SIGNAL (error(QString)), this, SLOT (errorString(QString)));
-//    connect(thread, SIGNAL (started()), worker, SLOT (process()));
-//    connect(worker, SIGNAL (finished()), thread, SLOT (quit()));
-//    connect(worker, SIGNAL (finished()), worker, SLOT (deleteLater()));
-//    connect(thread, SIGNAL (finished()), thread, SLOT (deleteLater()));
-//    thread->start();
-    }
 }
 
 MainWindow::~MainWindow()
@@ -67,11 +54,6 @@ void MainWindow::setupCamera()
     v_guideline_pos = width / 2;
     h_guideline_pos = height * 9 / 10;
 }
-
-//void MainWindow::initThread()
-//{
-////    t.join();
-//}
 
 void MainWindow::initSerial()
 {

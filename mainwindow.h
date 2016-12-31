@@ -8,7 +8,6 @@
 #include <QtSerialPort/QSerialPortInfo>
 #include <QDebug>
 #include <QThread>
-#include "worker.h"
 #include "renderer.h"
 
 using namespace std;

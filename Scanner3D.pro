@@ -21,14 +21,12 @@ LIBS        +=  `pkg-config --libs opencv` \
 SOURCES +=  main.cpp\
             mainwindow.cpp \
             scan.cpp \
-    worker.cpp \
     renderer.cpp \
     pointcloud.cpp \
     oglwidget.cpp
 
 HEADERS  += mainwindow.h \
             scan.h \
-    worker.h \
     renderer.h \
     pointcloud.h \
     oglwidget.h
