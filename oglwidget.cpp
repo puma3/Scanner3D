@@ -49,7 +49,7 @@ void OGLWidget::resizeGL(int w, int h)
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
 //    glOrtho(-width/2.0, width/2.0, -height/2.0, height/2.0, -1.0, 1.0);
-    glOrtho(-width/2.0, width/2.0, 0.0, height, -width/2.0, width/2.0);
+    glOrtho(-width/2.0, width/2.0, 0.0, height, 0.0, width/2.0);
     glMatrixMode(GL_MODELVIEW);
     glLoadIdentity();
 }

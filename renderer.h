@@ -3,6 +3,7 @@
 
 #include <QDialog>
 #include <QDebug>
+#include <QTimer>
 #include <math.h>
 #include "scan.h"
 #include "pointcloud.h"
@@ -17,13 +18,18 @@ class Renderer : public QDialog
     Q_OBJECT
 
 public:
-    explicit Renderer(QWidget *parent = 0);
+    explicit Renderer(VideoCapture *capturer, int *_brightestPixls, QWidget *parent = 0);
     ~Renderer();
 
     void setFrameSize(int _w = 640, int _h = 480);
+
     void setAngles(float _laserAngle, float _stepAngle);
 
+    void frameBrightestPixels_();
+
 public slots:
+    void captureFrames(int n, int rate);
+
     void frameBrightestPixels();
 
     void processSlice();
@@ -31,9 +37,14 @@ public slots:
 private:
     Ui::Renderer *ui;
 
+    VideoCapture *capWebCam;
+
+    Mat transformationMat;
+
     int width,
         height,
         middle_x,
+        n_frames,
         iterator;
 
     int *brightestPixls;
@@ -42,6 +53,8 @@ private:
           stepAngle;
 
     PointCloud points;
+
+    QTimer timer;
 
 signals:
     void finishedPixelCalculation();

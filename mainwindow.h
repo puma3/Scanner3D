@@ -28,26 +28,41 @@ public:
 
     void start();
 
-    void startCamera();
-
 //    void initThread();
+
+    void setupCamera();
 
     void initSerial();
 
+    void cameraShow();
+
     VideoCapture capWebCam;
-    QTimer * Timer;
+    QTimer * timer;
     uint iterator;
 
 private:
     Renderer *rndr;
 
+    QImage camera_frame;
+
+    int *brightestPixls;
+
+    int width,
+        height,
+        v_guideline_pos,
+        h_guideline_pos;
+
+    bool highlight;
+
 protected slots:
-    void on_actionCapture();
+    void showCameraFrame();
+
+    void highlight_bright_pixels();
 
 protected:
     Ui::MainWindow *ui;
 
-    Mat matProcessed;
+//    Mat matProcessed;
     Mat matOriginal;
 
     QImage qimgOriginal;
@@ -55,6 +70,11 @@ protected:
 
 private slots:
     void on_pushButton_2_clicked();
+
+    void on_scan_bttn_clicked();
+
+signals:
+    void startCapturing(int, int);
 };
 
 #endif // MAINWINDOW_H

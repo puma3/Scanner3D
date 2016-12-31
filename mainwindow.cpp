@@ -5,6 +5,9 @@
 #include <stdlib.h>
 
 #define _NO_WEBCAM_
+#define PERIOD 68700
+//#define PERIOD 5000
+#define ANGLE_CAMERA 45.0
 
 using namespace std;
 using namespace cv;
@@ -13,19 +16,21 @@ Scan scan;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow),
-    iterator(0)
+    iterator(0),
+    highlight(false),
+    ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-
-    rndr = new Renderer(this);
-#ifdef _NO_WEBCAM_
-    rndr->show();
-#endif
-
-    startCamera();
+    setupCamera();
+    cameraShow();
+    brightestPixls = new int[height];
+    rndr = new Renderer(&capWebCam, brightestPixls, this);  //New Renderer
+    connect(this, SIGNAL(startCapturing(int, int)), rndr, SLOT(captureFrames(int, int)));
+    connect(rndr, SIGNAL(finishedPixelCalculation()), this, SLOT(highlight_bright_pixels()));
+    rndr->setFrameSize(width, height);
     initSerial();               //Inicializar la comunicacion serial
 
+    {
 //    QThread* thread = new QThread;
 //    Worker* worker = new Worker();
 //    worker->setup(this, &capWebCam);
@@ -36,35 +41,37 @@ MainWindow::MainWindow(QWidget *parent) :
 //    connect(worker, SIGNAL (finished()), worker, SLOT (deleteLater()));
 //    connect(thread, SIGNAL (finished()), thread, SLOT (deleteLater()));
 //    thread->start();
+    }
+}
+
+MainWindow::~MainWindow()
+{
+    delete []brightestPixls;
+    delete timer;
+    delete ui;
+}
+
+void MainWindow::setupCamera()
+{
+#ifndef _NO_WEBCAM_
+    capWebCam.open(1);
+#else
+    capWebCam.open(0);
+#endif
+    if(!capWebCam.isOpened()) {
+        cout << "Camera couldn't start" << endl;
+        return;
+    }
+    width = capWebCam.get(CV_CAP_PROP_FRAME_WIDTH);
+    height = capWebCam.get(CV_CAP_PROP_FRAME_HEIGHT);
+    v_guideline_pos = width / 2;
+    h_guideline_pos = height * 9 / 10;
 }
 
 //void MainWindow::initThread()
 //{
 ////    t.join();
 //}
-
-void MainWindow::startCamera()
-{
-#ifndef _NO_WEBCAM_
-//#ifdef _NO_WEBCAM_
-    capWebCam.open(1);
-#else
-    capWebCam.open(0);
-#endif
-    if(!capWebCam.isOpened())
-    {
-        cout<<"Error"<<endl;
-        return;
-    }
-
-    Timer = new QTimer(this);
-    connect(Timer, SIGNAL(timeout()),this, SLOT(on_actionCapture()));
-#ifndef _NO_WEBCAM_
-    Timer->start(1000);
-#else
-    Timer->start(10);
-#endif
-}
 
 void MainWindow::initSerial()
 {
@@ -94,51 +101,60 @@ void MainWindow::initSerial()
 
 //    else {
 //        qDebug() << "An error occured" << endl;
-//    }
+    //    }
 }
 
-
-void MainWindow::on_actionCapture()
+void MainWindow::cameraShow()
 {
+    timer = new QTimer(this);
+    connect(timer, SIGNAL(timeout()), this, SLOT(showCameraFrame()));
+    timer->start(17);
+}
 
+void MainWindow::showCameraFrame()
+{
     capWebCam >> matOriginal;
 
-#ifndef _NO_WEBCAM_
-    //Escribir a archivo
-    Mat frame;
-    capWebCam >> frame;
-    scan.listFrames.push_back(frame);
-    QString path = "output/scan" + QString::number(iterator++) + ".jpg";
-    imwrite(path.toStdString(), frame );
-#endif
-
     cvtColor(matOriginal,matOriginal,CV_BGR2RGB);
-    QImage img=QImage((uchar*) matOriginal.data, matOriginal.cols, matOriginal.rows, matOriginal.step, QImage::Format_RGB888);
+    camera_frame = QImage((uchar*) matOriginal.data,
+                          matOriginal.cols,
+                          matOriginal.rows,
+                          matOriginal.step,
+                          QImage::Format_RGB888);
 
     //Inicializamos el Painter
     QPainter painter;
-    painter.begin(&img);
+    painter.begin(&camera_frame);
     painter.setCompositionMode(QPainter::RasterOp_SourceXorDestination);
     painter.setPen(QColor(0x33, 0xff, 0x33));
 
     //Dibujamos las lineas guia
-    int w = img.width() / 2,
-        h = img.height() * 9 / 10;
-    painter.drawLine(w, 0, w, img.height());
-    painter.drawLine(0, h, img.width(), h);
+    painter.drawLine(v_guideline_pos, 0, v_guideline_pos, height);
+    painter.drawLine(0, h_guideline_pos, width, h_guideline_pos);
+
+    //Escribir sobre pixels mas brillantes
+    if(highlight) {
+    for (int i=0; i < height ; i++)
+        camera_frame.setPixel(brightestPixls[i], i, qRgb(0, 0, 255));
+    }
 
     //Mandar imagen a label: camera
-    ui->camera->setPixmap(QPixmap::fromImage(img));
+    ui->camera->setPixmap(QPixmap::fromImage(camera_frame));
 }
 
-MainWindow::~MainWindow()
+void MainWindow::highlight_bright_pixels()
 {
-    delete ui;
+    highlight = true;
 }
 
 void MainWindow::on_pushButton_2_clicked() //Mesh rendering button
 {
-#ifndef _NO_WEBCAM_
     rndr->show();
-#endif
+}
+
+void MainWindow::on_scan_bttn_clicked()
+{
+    rndr->setAngles(ANGLE_CAMERA, 360.0 / ui->frames_spinBox->value());
+    ui->pushButton_2->setEnabled(true);
+    emit startCapturing(ui->frames_spinBox->value(), PERIOD / ui->frames_spinBox->value());
 }
