@@ -6,7 +6,6 @@
 
 #define _NO_WEBCAM_
 #define PERIOD 68700
-//#define PERIOD 5000
 #define ANGLE_CAMERA 45.0
 
 using namespace std;
@@ -16,7 +15,6 @@ Scan scan;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    iterator(0),
     highlight(false),
     ui(new Ui::MainWindow)
 {

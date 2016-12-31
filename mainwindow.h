@@ -27,17 +27,15 @@ public:
 
     void start();
 
-//    void initThread();
-
     void setupCamera();
 
     void initSerial();
 
     void cameraShow();
 
+//public members
     VideoCapture capWebCam;
     QTimer * timer;
-    uint iterator;
 
 private:
     Renderer *rndr;
@@ -61,11 +59,7 @@ protected slots:
 protected:
     Ui::MainWindow *ui;
 
-//    Mat matProcessed;
     Mat matOriginal;
-
-    QImage qimgOriginal;
-    QImage qimgProcessed;
 
 private slots:
     void on_pushButton_2_clicked();
