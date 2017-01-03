@@ -23,13 +23,15 @@ SOURCES +=  main.cpp\
             scan.cpp \
     renderer.cpp \
     pointcloud.cpp \
-    oglwidget.cpp
+    oglwidget.cpp \
+    overlaywidget.cpp
 
 HEADERS  += mainwindow.h \
             scan.h \
     renderer.h \
     pointcloud.h \
-    oglwidget.h
+    oglwidget.h \
+    overlaywidget.h
 
 FORMS    += mainwindow.ui \
     renderer.ui

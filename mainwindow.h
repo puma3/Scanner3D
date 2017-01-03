@@ -4,11 +4,10 @@
 #include <QTimer>
 #include <QMainWindow>
 #include <QPainter>
-#include <QtSerialPort/QSerialPort>
-#include <QtSerialPort/QSerialPortInfo>
 #include <QDebug>
 #include <QThread>
 #include "renderer.h"
+#include "overlaywidget.h"
 
 using namespace std;
 using namespace cv;
@@ -29,9 +28,9 @@ public:
 
     void setupCamera();
 
-    void initSerial();
-
     void cameraShow();
+
+    bool eventFilter(QObject *obj, QEvent *event);
 
 //public members
     VideoCapture capWebCam;
@@ -50,6 +49,8 @@ private:
         h_guideline_pos;
 
     bool highlight;
+
+    SelectionOverlay *selection;
 
 protected slots:
     void showCameraFrame();

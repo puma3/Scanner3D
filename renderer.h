@@ -5,6 +5,8 @@
 #include <QDebug>
 #include <QTimer>
 #include <math.h>
+#include <QtSerialPort/QSerialPort>
+#include <QtSerialPort/QSerialPortInfo>
 #include "scan.h"
 #include "pointcloud.h"
 #include "oglwidget.h"
@@ -25,6 +27,10 @@ public:
 
     void setAngles(float _laserAngle, float _stepAngle);
 
+    void setRange(int x0, int y0, int xf, int yf);
+
+    void initSerial();
+
     void frameBrightestPixels_();
 
 public slots:
@@ -44,6 +50,10 @@ private:
     int width,
         height,
         middle_x,
+        r_x0,
+        r_y0,
+        r_xf,
+        r_yf,
         n_frames,
         iterator;
 

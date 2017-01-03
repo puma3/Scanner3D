@@ -1,7 +1,7 @@
 #include "renderer.h"
 #include "ui_renderer.h"
 
-#define _WORKING_WITH_FILES_
+//#define _WORKING_WITH_FILES_
 
 Renderer::Renderer(VideoCapture *capturer, int *_brightestPixls, QWidget *parent) :
     QDialog(parent),
@@ -13,6 +13,7 @@ Renderer::Renderer(VideoCapture *capturer, int *_brightestPixls, QWidget *parent
 {
     ui->setupUi(this);
     ui->openGLWidget->setPointCloud(&points);
+    initSerial();               //Inicializar la comunicacion serial
 #ifndef _WORKING_WITH_FILES_
     connect(this, SIGNAL(finishedPixelCalculation()), this, SLOT(processSlice()));
 #endif
@@ -28,6 +29,11 @@ void Renderer::setFrameSize(int _w, int _h)
     width = _w;
     height = _h;
     middle_x = _w / 2;
+
+    r_x0 = 0;
+    r_y0 = 0;
+    r_xf = width;
+    r_yf = height;
 }
 
 void Renderer::setAngles(float _laserAngle, float _stepAngle)
@@ -36,15 +42,55 @@ void Renderer::setAngles(float _laserAngle, float _stepAngle)
     stepAngle = _stepAngle * 3.1416 / 180;
 }
 
+void Renderer::setRange(int x0, int y0, int xf, int yf)
+{
+    qDebug() << "Setting: " << x0 << y0 << xf << yf;
+    r_x0 = x0;
+    r_y0 = y0;
+    r_xf = xf;
+    r_yf = yf;
+}
+
+void Renderer::initSerial()
+{
+    QSerialPortInfo info("COM1");
+    // Check info of the port
+    qDebug() << "Name        : " << info.portName();
+    qDebug() << "Manufacturer: " << info.manufacturer(); //if showing manufacturer, means Qstring &name is good
+    qDebug() << "Busy: " << info.isBusy() << endl;
+
+    // Initialize Serial
+    QSerialPort serial;
+    serial.setPortName("Arduino");
+    serial.open(QIODevice::ReadWrite);
+    serial.setBaudRate(QSerialPort::Baud9600);
+    serial.setDataBits(QSerialPort::Data8);
+    serial.setParity(QSerialPort::NoParity);
+    serial.setStopBits(QSerialPort::OneStop);
+    serial.setFlowControl(QSerialPort::NoFlowControl);
+}
+
 void Renderer::captureFrames(int n, int rate) {
     n_frames = n;
     iterator = 0;
     qDebug() << "Will capture" << n_frames << "frames at" << rate << "ms";
+    qDebug() << "Range: (" << r_x0 << ", " << r_y0 << ") -> (" << r_xf << ", " << r_yf << ")";
 #ifdef _WORKING_WITH_FILES_
     frameBrightestPixels_();
 #endif
     connect(&timer, SIGNAL(timeout()), this, SLOT(frameBrightestPixels()));
     timer.start(rate);
+
+//    if (serial.isOpen() && serial.isWritable()) {
+//        QByteArray ba("R");
+//        serial.write(ba);
+//        serial.flush();
+//        qDebug() << "data has been send" << endl;
+//        serial.close();
+//    }
+
+//    else
+//        qDebug() << "An error occured" << endl;
 }
 
 void Renderer::frameBrightestPixels()
@@ -56,9 +102,9 @@ void Renderer::frameBrightestPixels()
     cvtColor(transformationMat, transformationMat, CV_BGR2HLS);    //Imagen en HLS
 
     //Procesar pixel mas brillante para cada Y
-    for (int i=0; i < height ; i++) {
+    for (int i=r_y0; i < r_yf; i++) {
         brightestPixls[i] = 0;
-        for(int j=0; j < width; j++)
+        for(int j=r_x0; j < r_xf; j++)
             if(transformationMat.at<cv::Vec3b>(i,j)[1] >= transformationMat.at<cv::Vec3b>(i,brightestPixls[i])[1])
                 brightestPixls[i] = j;
     }

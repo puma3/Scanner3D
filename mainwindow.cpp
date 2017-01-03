@@ -4,7 +4,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#define _NO_WEBCAM_
+//#define _NO_WEBCAM_
 #define PERIOD 68700
 #define ANGLE_CAMERA 45.0
 
@@ -23,10 +23,11 @@ MainWindow::MainWindow(QWidget *parent) :
     cameraShow();
     brightestPixls = new int[height];
     rndr = new Renderer(&capWebCam, brightestPixls, this);  //New Renderer
+    selection = new SelectionOverlay(ui->camera);
+    selection->installEventFilter(this);
     connect(this, SIGNAL(startCapturing(int, int)), rndr, SLOT(captureFrames(int, int)));
     connect(rndr, SIGNAL(finishedPixelCalculation()), this, SLOT(highlight_bright_pixels()));
     rndr->setFrameSize(width, height);
-    initSerial();               //Inicializar la comunicacion serial
 }
 
 MainWindow::~MainWindow()
@@ -38,14 +39,14 @@ MainWindow::~MainWindow()
 
 void MainWindow::setupCamera()
 {
-#ifndef _NO_WEBCAM_
+
     capWebCam.open(1);
-#else
-    capWebCam.open(0);
-#endif
     if(!capWebCam.isOpened()) {
-        cout << "Camera couldn't start" << endl;
-        return;
+        capWebCam.open(0);
+        if(!capWebCam.isOpened()) {
+            cout << "Camera couldn't start" << endl;
+            return;
+        }
     }
     width = capWebCam.get(CV_CAP_PROP_FRAME_WIDTH);
     height = capWebCam.get(CV_CAP_PROP_FRAME_HEIGHT);
@@ -53,42 +54,35 @@ void MainWindow::setupCamera()
     h_guideline_pos = height * 9 / 10;
 }
 
-void MainWindow::initSerial()
-{
-//    QSerialPortInfo info("usbmodem621");
-//    // Check info of the port
-//    qDebug() << "Name        : " << info.portName();
-//    qDebug() << "Manufacturer: " << info.manufacturer(); //if showing manufacturer, means Qstring &name is good
-//    qDebug() << "Busy: " << info.isBusy() << endl;
-
-//    // Initialize Serial
-//    QSerialPort serial;
-//    serial.setPortName("usbmodem621");
-//    serial.open(QIODevice::ReadWrite);
-//    serial.setBaudRate(QSerialPort::Baud9600);
-//    serial.setDataBits(QSerialPort::Data8);
-//    serial.setParity(QSerialPort::NoParity);
-//    serial.setStopBits(QSerialPort::OneStop);
-//    serial.setFlowControl(QSerialPort::NoFlowControl);
-
-//    if (serial.isOpen() && serial.isWritable()) {
-//        QByteArray ba("R");
-//        serial.write(ba);
-//        serial.flush();
-//        qDebug() << "data has been send" << endl;
-//        serial.close();
-//    }
-
-//    else {
-//        qDebug() << "An error occured" << endl;
-    //    }
-}
-
 void MainWindow::cameraShow()
 {
     timer = new QTimer(this);
     connect(timer, SIGNAL(timeout()), this, SLOT(showCameraFrame()));
     timer->start(17);
+}
+
+bool MainWindow::eventFilter(QObject *obj, QEvent *event)
+{
+    if(qobject_cast<QWidget*>(obj)==selection && event->type() == QEvent::MouseButtonPress) {
+//        qDebug() << "Cl" << static_cast<QMouseEvent*>(event)->x();
+        selection->setInitialPoint(static_cast<QMouseEvent*>(event)->x(),
+                                   static_cast<QMouseEvent*>(event)->y());
+        selection->movementPoint(static_cast<QMouseEvent*>(event)->x(),
+                                 static_cast<QMouseEvent*>(event)->y());
+        return true;
+    }
+    if(qobject_cast<QWidget*>(obj)==selection && event->type() == QEvent::MouseMove) {
+//        qDebug() << "Mv" << static_cast<QMouseEvent*>(event)->x();
+        selection->movementPoint(static_cast<QMouseEvent*>(event)->x(),
+                                 static_cast<QMouseEvent*>(event)->y());
+        return true;
+    }
+    if(qobject_cast<QWidget*>(obj)==selection && event->type() == QEvent::MouseButtonRelease) {
+//        qDebug() << "Rl" << static_cast<QMouseEvent*>(event)->x();
+        selection->setFinalPoint(static_cast<QMouseEvent*>(event)->x(),
+                                 static_cast<QMouseEvent*>(event)->y());
+        return true;
+    }
 }
 
 void MainWindow::showCameraFrame()
@@ -114,7 +108,7 @@ void MainWindow::showCameraFrame()
 
     //Escribir sobre pixels mas brillantes
     if(highlight) {
-    for (int i=0; i < height ; i++)
+    for (int i=selection->top(); i < selection->bottom(); i++)
         camera_frame.setPixel(brightestPixls[i], i, qRgb(0, 0, 255));
     }
 
@@ -135,6 +129,8 @@ void MainWindow::on_pushButton_2_clicked() //Mesh rendering button
 void MainWindow::on_scan_bttn_clicked()
 {
     rndr->setAngles(ANGLE_CAMERA, 360.0 / ui->frames_spinBox->value());
+    if(selection->isSet())
+        rndr->setRange(selection->left(), selection->top(), selection->right(), selection->bottom());
     ui->pushButton_2->setEnabled(true);
     emit startCapturing(ui->frames_spinBox->value(), PERIOD / ui->frames_spinBox->value());
 }
