@@ -5,8 +5,8 @@
 #include <QDebug>
 #include <QTimer>
 #include <math.h>
-#include <QtSerialPort/QSerialPort>
-#include <QtSerialPort/QSerialPortInfo>
+#include <QSerialPort>
+#include <QSerialPortInfo>
 #include "scan.h"
 #include "pointcloud.h"
 #include "oglwidget.h"
@@ -40,12 +40,16 @@ public slots:
 
     void processSlice();
 
+    void turnOnLaser();
+
 private:
     Ui::Renderer *ui;
 
     VideoCapture *capWebCam;
 
     Mat transformationMat;
+
+    QSerialPort *serial;
 
     int width,
         height,

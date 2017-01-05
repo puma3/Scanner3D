@@ -35,7 +35,8 @@ bool OverlayWidget::event(QEvent *ev) {
 
 SelectionOverlay::SelectionOverlay(QWidget *parent) :
     OverlayWidget(parent),
-    dims(0, 0, 0, 0)
+    dims(0, 0, 0, 0),
+    set(false)
 {
     setAttribute(Qt::WA_TranslucentBackground);
 }
@@ -44,7 +45,7 @@ void SelectionOverlay::paintEvent(QPaintEvent *)
 {
     if(set) {
         QPainter p(this);
-        p.fillRect(dims, QColor(40, 70, 130, 90));
+        p.fillRect(dims, QColor(40, 70, 200, 50));
     }
 }
 

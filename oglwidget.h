@@ -3,6 +3,7 @@
 
 #include <QWidget>
 #include <QOpenGLWidget>
+#include <QtGlobal>
 //#include <GL/glu.h>
 //#include <GL/gl.h>
 #include <GL/freeglut.h>
@@ -21,13 +22,19 @@ public:
 
     void setPointCloud(PointCloud *ptr);
 
+    void resizeGL(int w, int h);
+
     PointCloud *cloud;
 
-    void resizeGL(int w, int h);
+public slots:
+    void setRotX(int _rot)  {   rotX = _rot;    update();   }
 
 protected:
     void initializeGL();
     void paintGL();
+
+private:
+    int rotX;
 };
 
 #endif // OGLWIDGET_H

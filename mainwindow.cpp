@@ -7,6 +7,7 @@
 //#define _NO_WEBCAM_
 #define PERIOD 68700
 #define ANGLE_CAMERA 45.0
+//#define ANGLE_CAMERA 30.0
 
 using namespace std;
 using namespace cv;
@@ -26,6 +27,7 @@ MainWindow::MainWindow(QWidget *parent) :
     selection = new SelectionOverlay(ui->camera);
     selection->installEventFilter(this);
     connect(this, SIGNAL(startCapturing(int, int)), rndr, SLOT(captureFrames(int, int)));
+    connect(ui->commandLinkButton, SIGNAL(clicked(bool)), rndr, SLOT(turnOnLaser()));
     connect(rndr, SIGNAL(finishedPixelCalculation()), this, SLOT(highlight_bright_pixels()));
     rndr->setFrameSize(width, height);
 }
@@ -108,7 +110,9 @@ void MainWindow::showCameraFrame()
 
     //Escribir sobre pixels mas brillantes
     if(highlight) {
-    for (int i=selection->top(); i < selection->bottom(); i++)
+    for (int i = selection->isSet() ? selection->top() : 0;
+         i < (selection->isSet() ? selection->bottom() : height);
+         i++)
         camera_frame.setPixel(brightestPixls[i], i, qRgb(0, 0, 255));
     }
 
