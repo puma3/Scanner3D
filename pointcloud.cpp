@@ -19,13 +19,21 @@ void PointCloud::push_back(float _x, float _y, float _z)
     cloud.push_back(Point3D(_x, _y, _z));
 }
 
-void PointCloud::meshify()
+void PointCloud::clean()
 {
-    for(auto i = 0; i < height*(frames-1); i+=height) {
-//        for (int j = i; j < i + height-1; j+=4) {
-        for (int j = i; j < i + height-1; j++) {
-//            mesh.push_back(Polygon(&cloud[j], &cloud[j+height], &cloud[j+4+height], &cloud[j+4]));
-            mesh.push_back(Polygon(&cloud[j], &cloud[j+height], &cloud[j+1+height], &cloud[j+1]));
+    cloud.clear();
+    mesh.clear();
+}
+
+void PointCloud::meshify(int step)
+{
+    for(auto i = 0; i < height*(frames); i+=height) {
+        for (int j = i; j < (i + height-step-2); j+=step) {
+            if(i != height*(frames)) {
+                mesh.push_back(Polygon(&cloud[j], &cloud[j+height], &cloud[j+height+step], &cloud[j+step]));
+            }
+            else
+                mesh.push_back(Polygon(&cloud[j], &cloud[j%height], &cloud[j%height+step], &cloud[j+step]));
         }
     }
 }

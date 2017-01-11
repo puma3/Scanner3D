@@ -37,7 +37,9 @@ public:
 
     void setFrames(int _frames) {   frames = _frames;    }
 
-    void meshify();
+    void clean();
+
+    void meshify(int step = 5);
 
     int height,
         frames;

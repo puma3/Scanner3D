@@ -5,7 +5,8 @@
 #include <stdlib.h>
 
 //#define _NO_WEBCAM_
-#define PERIOD 68700
+#define PERIOD 69400
+//#define PERIOD 8700
 #define ANGLE_CAMERA 45.0
 //#define ANGLE_CAMERA 30.0
 
@@ -90,6 +91,10 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
 void MainWindow::showCameraFrame()
 {
     capWebCam >> matOriginal;
+
+//    cvtColor(matOriginal, matOriginal, CV_BGR2GRAY);
+//    threshold(matOriginal, matOriginal, 230, 255, 3);
+//    cvtColor(matOriginal, matOriginal, CV_GRAY2BGR);
 
     cvtColor(matOriginal,matOriginal,CV_BGR2RGB);
     camera_frame = QImage((uchar*) matOriginal.data,

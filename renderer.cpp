@@ -1,7 +1,7 @@
 #include "renderer.h"
 #include "ui_renderer.h"
 
-#define _WORKING_WITH_FILES_
+//#define _WORKING_WITH_FILES_
 
 Renderer::Renderer(VideoCapture *capturer, int *_brightestPixls, QWidget *parent) :
     QDialog(parent),
@@ -80,6 +80,7 @@ void Renderer::initSerial()
 
 void Renderer::captureFrames(int n, int rate) {
     n_frames = n;
+    points.clean();
     points.setFrames(n_frames);
     iterator = 0;
     qDebug() << "Will capture" << n_frames << "frames at" << rate << "ms";
@@ -104,15 +105,40 @@ void Renderer::frameBrightestPixels()
     //Obtener imagen desde OpenCV
     (*capWebCam) >> transformationMat;
 
-    threshold(transformationMat, transformationMat, 240, 255, 3);
+    threshold(transformationMat, transformationMat, 235, 255, 3);
+    cvtColor(transformationMat, transformationMat, CV_BGR2GRAY);
+    cvtColor(transformationMat, transformationMat, CV_GRAY2BGR);
     cvtColor(transformationMat, transformationMat, CV_BGR2HLS);    //Imagen en HLS
 
+//    //Procesar pixel mas brillante para cada Y
+//    for (int i=r_y0; i < r_yf; i++) {
+//        brightestPixls[i] = middle_x;
+//        for(int j=middle_x; j < r_xf; j++) {
+//            if(transformationMat.at<cv::Vec3b>(i,j)[1] > transformationMat.at<cv::Vec3b>(i,brightestPixls[i])[1])
+//                brightestPixls[i] = j;
+//        }
+//    }
+
     //Procesar pixel mas brillante para cada Y
+    int count;
+    bool continous;
     for (int i=r_y0; i < r_yf; i++) {
-        brightestPixls[i] = 0;
-        for(int j=r_x0; j < r_xf; j++)
-            if(transformationMat.at<cv::Vec3b>(i,j)[1] >= transformationMat.at<cv::Vec3b>(i,brightestPixls[i])[1])
-                brightestPixls[i] = j;
+        count = 0;  continous = false;
+        brightestPixls[i] = middle_x;
+        for(int j=middle_x; j < r_xf; j++) {
+            if(transformationMat.at<cv::Vec3b>(i,j)[1] == transformationMat.at<cv::Vec3b>(i,brightestPixls[i])[1]) {
+                count++;
+                continous = true;
+            }
+            else {
+                continous = false;
+                if(transformationMat.at<cv::Vec3b>(i,j)[1] > transformationMat.at<cv::Vec3b>(i,brightestPixls[i])[1]) {
+                    count = 0;
+                    brightestPixls[i] = j;
+                }
+            }
+        }
+        brightestPixls[i] = brightestPixls[i] + count / 2;
     }
 
     emit finishedPixelCalculation();
@@ -120,7 +146,7 @@ void Renderer::frameBrightestPixels()
 
 void Renderer::frameBrightestPixels_()
 {
-    for(int it = 5; it < 72; ++it) {
+    for(int it = 2; it < 72; ++it) {
     //Obtener imagen desde OpenCV
     Mat currentMat,
         transformationMat;
@@ -130,34 +156,33 @@ void Renderer::frameBrightestPixels_()
 
     transformationMat = imread(path.toStdString(), CV_LOAD_IMAGE_COLOR);
 
-    threshold(transformationMat, transformationMat, 240, 255, 3);
+    threshold(transformationMat, transformationMat, 235, 255, 3);
+    cvtColor(transformationMat, transformationMat, CV_BGR2GRAY);
+    cvtColor(transformationMat, transformationMat, CV_GRAY2BGR);
     cvtColor(transformationMat, transformationMat, CV_BGR2HLS);    //Imagen en HLS
 
     //Procesar pixel mas brillante para cada Y
+    int count;
+    bool continous;
     for (int i=r_y0; i < r_yf; i++) {
-        brightestPixls[i] = 0;
-        for(int j=r_x0; j < r_xf; j++)
-            if(transformationMat.at<cv::Vec3b>(i,j)[1] >= transformationMat.at<cv::Vec3b>(i,brightestPixls[i])[1])
-                brightestPixls[i] = j;
+        count = 0;  continous = false;
+        brightestPixls[i] = middle_x;
+        for(int j=middle_x; j < r_xf; j++) {
+            if(transformationMat.at<cv::Vec3b>(i,j)[1] == transformationMat.at<cv::Vec3b>(i,brightestPixls[i])[1]) {
+                count++;
+                continous = true;
+            }
+            else {
+                continous = false;
+                if(transformationMat.at<cv::Vec3b>(i,j)[1] > transformationMat.at<cv::Vec3b>(i,brightestPixls[i])[1]) {
+                    count = 0;
+                    brightestPixls[i] = j;
+                }
+            }
+        }
+        brightestPixls[i] = brightestPixls[i] + count / 2;
     }
 
-    //Imagen en RGB
-//    cvtColor(transformationMat, currentMat, CV_HLS2RGB);
-//    cvtColor(currentMat, currentMat, CV_BGR2RGB);
-
-//    //Load image using QImage
-//    QImage img = QImage((uchar*) currentMat.data,
-//                        currentMat.cols,
-//                        currentMat.rows,
-//                        currentMat.step,
-//                        QImage::Format_RGB888);
-
-//    //Escribir sobre pixels mas brillantes
-//    for (int i=0; i < height ; i++)
-//        img.setPixel(brightestPixls[i], i, qRgb(0, 0, 255));
-
-//    //Mandar imagen a label: lbl_Pic
-//    ui->lbl_Pic->setPixmap(QPixmap::fromImage(img));
 
     processSlice();
     }
@@ -176,7 +201,7 @@ void Renderer::processSlice()
     //Calculate position in space
     float dAngle = stepAngle * iterator++,
           dx, dz, x, z;
-    for (int i=0; i < height ; i++) {
+    for (int i=r_y0; i < r_yf; i++) {
         dx = brightestPixls[i] - middle_x;
         dz = dx / sin(laserAngle);
 

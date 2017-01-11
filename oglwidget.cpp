@@ -1,5 +1,7 @@
 #include "oglwidget.h"
 
+//#define _TESTING_CODE_
+
 OGLWidget::OGLWidget(QWidget *parent) :
     QOpenGLWidget(parent),
     rotX(0)
@@ -17,30 +19,22 @@ void OGLWidget::setPointCloud(PointCloud *ptr)
 
 void OGLWidget::initializeGL()
 {
-//    glClearColor(0, 0, 0, 1);
-//    glEnable(GL_DEPTH_TEST);
-//    glEnable(GL_LIGHT0);
-//    glEnable(GL_LIGHTING);
-//    glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-//    glEnable(GL_COLOR_MATERIAL);
-
-
-    //glutInitDisplayMode (GLUT_DOUBLE | GLUT_RGB);
-
-    glutInitDisplayMode (GLUT_SINGLE | GLUT_RGB | GLUT_DEPTH);
+#ifndef _TESTING_CODE_
+    glutInitDisplayMode (GLUT_DOUBLE | GLUT_RGB | GLUT_DEPTH);
     glClearColor (0.0, 0.0, 0.0, 0.0);
     glShadeModel (GL_FLAT);
 
-//    LIGHTS
-//    GLfloat ambient[] = { 0.2, 0.2, 0.2, 1.0 };
-    GLfloat ambient[] = { 1.0, 1.0, 1.0, 1.0 };
-    GLfloat position[] = { 0.0, 240.0, 1.0, 1.0 };
-    GLfloat mat_diffuse[] = { 0.6, 0.6, 0.6, 0.5 };
-    GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0 };
-    GLfloat mat_shininess[] = { 100.0 };
-
+    glEnable(GL_DEPTH_TEST);
+    glShadeModel(GL_SMOOTH);
     glEnable(GL_LIGHTING);
     glEnable(GL_LIGHT0);
+
+//    LIGHTS
+    GLfloat ambient[] = { 1.0, 1.0, 1.0, 0.5 };
+    GLfloat position[] = { 0.0, 160.0, 10.0, 1.0 };
+    GLfloat mat_diffuse[] = { 0.6, 0.6, 0.6, 40.0 };
+    GLfloat mat_specular[] = { 1.0, 1.0, 1.0, 1.0 };
+    GLfloat mat_shininess[] = { 100.0 };
 
     glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
     glLightfv(GL_LIGHT0, GL_POSITION, position);
@@ -48,15 +42,13 @@ void OGLWidget::initializeGL()
     glMaterialfv(GL_FRONT, GL_DIFFUSE, mat_diffuse);
     glMaterialfv(GL_FRONT, GL_SPECULAR, mat_specular);
     glMaterialfv(GL_FRONT, GL_SHININESS, mat_shininess);
-
-//    glEnable(GL_DEPTH_TEST);
-//    glEnable(GL_CULL_FACE);
-//    glShadeModel(GL_SMOOTH);
-//    glEnable(GL_LIGHTING);
-//    glEnable(GL_LIGHT0);
-
-    static GLfloat lightPosition[4] = { 0, 0, 0, 0.5 };
-    glLightfv(GL_LIGHT0, GL_POSITION, lightPosition);
+#else
+    glClearColor (0.0, 0.0, 0.0, 0.0);
+       glShadeModel (GL_SMOOTH);
+       glEnable(GL_LIGHTING);
+       glEnable(GL_LIGHT0);
+       glEnable(GL_DEPTH_TEST);
+#endif
 
     //Points
     glColor3f(1.0, 1.0, 1.0);
@@ -67,19 +59,38 @@ void OGLWidget::resizeGL(int w, int h)
 {
     int width = 640,
         height = 480;
+#ifndef _TESTING_CODE_
     glViewport (0, 0, (GLsizei) w, (GLsizei) h);
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glOrtho(-width/2.0, width/2.0, 0.0, height, width/2.0, 0.0);
     glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+#else
+    glViewport (0, 0, (GLsizei) w, (GLsizei) h);
+       glMatrixMode (GL_PROJECTION);
+       glLoadIdentity();
+       glOrtho(-width/2.0, width/2.0, 0.0, height, width/2.0, 0.0);
+       gluPerspective(40.0, (GLfloat) w/(GLfloat) h, 1.0, 20.0);
+       glMatrixMode(GL_MODELVIEW);
+       glLoadIdentity();
+#endif
 }
 
 void OGLWidget::paintGL()
 {
+#ifndef _TESTING_CODE_
+//    GLfloat ambient[] = { 1.0, 1.0, 1.0, 0.5 };
+//    GLfloat position[] = { 0.0, 160.0, 480.0, 1.0 };
     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-//    glTranslatef(0.0, 0.0, 240);
+
+//    glPushMatrix();
+//        gluLookAt (0.0, 0.0, 150.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0);
+//        glPushMatrix();
+//            glLightfv(GL_LIGHT0, GL_AMBIENT, ambient);
+//            glLightfv(GL_LIGHT0, GL_POSITION, position);
+//        glPopMatrix();
+
 
     //Rotation
     glRotatef(rotX, 0.0, 1.0, 0.0);
@@ -95,13 +106,45 @@ void OGLWidget::paintGL()
             glVertex3f(it->edge_2->x, it->edge_2->y, it->edge_2->z);
             glVertex3f(it->edge_4->x, it->edge_4->y, it->edge_4->z);
 
-//            glVertex3f(it->edge_2->x, it->edge_2->y, it->edge_2->z);
-//            glVertex3f(it->edge_3->x, it->edge_3->y, it->edge_3->z);
-//            glVertex3f(it->edge_4->x, it->edge_4->y, it->edge_4->z);
+            glVertex3f(it->edge_2->x, it->edge_2->y, it->edge_2->z);
+            glVertex3f(it->edge_3->x, it->edge_3->y, it->edge_3->z);
+            glVertex3f(it->edge_4->x, it->edge_4->y, it->edge_4->z);
         }
     glEnd();
 
-    glPushMatrix();//GL_MODELVIEW);
     glLoadIdentity();
-    glPopMatrix();//GL_MODELVIEW);
+    glPopMatrix();              //GL_MODELVIEW);
+    glFlush();
+#else
+    GLfloat position[] = { 0.0, 0.0, 1.5, 1.0 };
+
+       glClear (GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+       glPushMatrix ();
+       glTranslatef (0.0, 0.0, -5.0);
+
+       glPushMatrix ();
+       glRotated ((GLdouble) 0.0, rotX/360, 0.0, 0.0);
+       glLightfv (GL_LIGHT0, GL_POSITION, position);
+
+       glTranslated (0.0, 0.0, 1.5);
+       glDisable (GL_LIGHTING);
+       glColor3f (1.0, 1.0, 1.0);
+
+       glBegin(GL_TRIANGLES);
+           for (auto it = cloud->mesh.begin(); it != cloud->mesh.end(); ++it) {
+               glVertex3f(it->edge_1->x, it->edge_1->y, it->edge_1->z);
+               glVertex3f(it->edge_2->x, it->edge_2->y, it->edge_2->z);
+               glVertex3f(it->edge_4->x, it->edge_4->y, it->edge_4->z);
+
+               glVertex3f(it->edge_2->x, it->edge_2->y, it->edge_2->z);
+               glVertex3f(it->edge_3->x, it->edge_3->y, it->edge_3->z);
+               glVertex3f(it->edge_4->x, it->edge_4->y, it->edge_4->z);
+           }
+
+       glEnd();
+       glEnable (GL_LIGHTING);
+       glPopMatrix ();
+
+       glFlush ();
+#endif
 }
