@@ -4,10 +4,10 @@
 #
 #-------------------------------------------------
 
-QT       += core gui \
-            serialport
+QT       += core gui #\
+#            serialport
 
-CONFIG += c++11
+CONFIG += c++11 serialport
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
