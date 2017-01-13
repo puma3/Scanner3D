@@ -13,7 +13,9 @@
 using namespace std;
 using namespace cv;
 
-Scan scan;
+//Scan scan;
+
+int counter = 0;
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -30,7 +32,13 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this, SIGNAL(startCapturing(int, int)), rndr, SLOT(captureFrames(int, int)));
     connect(ui->commandLinkButton, SIGNAL(clicked(bool)), rndr, SLOT(turnOnLaser()));
     connect(rndr, SIGNAL(finishedPixelCalculation()), this, SLOT(highlight_bright_pixels()));
+    connect(rndr, SIGNAL(finishedCapturingPoints()), this, SLOT(on_finished_scanning()));
     rndr->setFrameSize(width, height);
+
+    //Setting up progress bar
+    progressBar = new QProgressBar(ui->statusBar);
+    progressBar->setAlignment(Qt::AlignRight);
+    progressBar->setMaximumSize(180, 19);
 }
 
 MainWindow::~MainWindow()
@@ -86,6 +94,7 @@ bool MainWindow::eventFilter(QObject *obj, QEvent *event)
                                  static_cast<QMouseEvent*>(event)->y());
         return true;
     }
+    return false;
 }
 
 void MainWindow::showCameraFrame()
@@ -128,6 +137,12 @@ void MainWindow::showCameraFrame()
 void MainWindow::highlight_bright_pixels()
 {
     highlight = true;
+
+    //Updating status bar text
+    QString msg = QString::number(counter++) + "/" + QString::number(ui->frames_spinBox->value()) + " frames scanned";
+    ui->statusBar->showMessage(tr(msg.toStdString().c_str()), 1000);
+
+    progressBar->setValue(counter);
 }
 
 void MainWindow::on_pushButton_2_clicked() //Mesh rendering button
@@ -141,5 +156,13 @@ void MainWindow::on_scan_bttn_clicked()
     if(selection->isSet())
         rndr->setRange(selection->left(), selection->top(), selection->right(), selection->bottom());
     ui->pushButton_2->setEnabled(true);
+    ui->statusBar->addPermanentWidget(progressBar);
+    progressBar->setMaximum(ui->frames_spinBox->value());
+    progressBar->setValue(0);
     emit startCapturing(ui->frames_spinBox->value(), PERIOD / ui->frames_spinBox->value());
+}
+
+void MainWindow::on_finished_scanning()
+{
+    ui->statusBar->showMessage(tr("Scanning finished, now creating mesh..."), 1000);
 }

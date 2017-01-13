@@ -3,6 +3,7 @@
 
 #include <iostream>
 #include <vector>
+#include <fstream>
 
 using namespace std;
 
@@ -40,6 +41,8 @@ public:
     void clean();
 
     void meshify(int step = 5);
+
+    void saveToFile();
 
     int height,
         frames;

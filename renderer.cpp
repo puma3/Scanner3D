@@ -1,7 +1,7 @@
 #include "renderer.h"
 #include "ui_renderer.h"
 
-//#define _WORKING_WITH_FILES_
+#define _WORKING_WITH_FILES_
 
 Renderer::Renderer(VideoCapture *capturer, int *_brightestPixls, QWidget *parent) :
     QDialog(parent),
@@ -17,6 +17,8 @@ Renderer::Renderer(VideoCapture *capturer, int *_brightestPixls, QWidget *parent
     initSerial();               //Inicializar la comunicacion serial
     connect(&timer, SIGNAL(timeout()), this, SLOT(frameBrightestPixels()));
     connect(ui->horizontalSlider, SIGNAL(valueChanged(int)), ui->openGLWidget, SLOT(setRotX(int)));
+    ui->openGLWidget->setMinimumHeight(capWebCam->get(CV_CAP_PROP_FRAME_HEIGHT));
+    ui->openGLWidget->setMinimumWidth(capWebCam->get(CV_CAP_PROP_FRAME_WIDTH));
 #ifndef _WORKING_WITH_FILES_
     connect(this, SIGNAL(finishedPixelCalculation()), this, SLOT(processSlice()));
 #endif
@@ -187,6 +189,8 @@ void Renderer::frameBrightestPixels_()
     processSlice();
     }
     points.meshify();
+    points.saveToFile();
+    qDebug() << "File was written";
 }
 
 void Renderer::processSlice()
@@ -194,8 +198,11 @@ void Renderer::processSlice()
     //Stop timer
     if(iterator >= n_frames) {
         timer.stop();
-        points.meshify();                   ///Esto es lo que añadimos
+        points.meshify();
         qDebug() << "Timer was stopped";
+        points.saveToFile();
+        qDebug() << "File was written";
+        emit finishedCapturingPoints();
     }
 
     //Calculate position in space

@@ -5,8 +5,7 @@
 OGLWidget::OGLWidget(QWidget *parent) :
     QOpenGLWidget(parent),
     rotX(0)
-{
-}
+{}
 
 OGLWidget::~OGLWidget()
 {

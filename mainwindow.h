@@ -6,6 +6,7 @@
 #include <QPainter>
 #include <QDebug>
 #include <QThread>
+#include <QProgressBar>
 #include "renderer.h"
 #include "overlaywidget.h"
 
@@ -52,6 +53,8 @@ private:
 
     SelectionOverlay *selection;
 
+    QProgressBar *progressBar;
+
 protected slots:
     void showCameraFrame();
 
@@ -66,6 +69,8 @@ private slots:
     void on_pushButton_2_clicked();
 
     void on_scan_bttn_clicked();
+
+    void on_finished_scanning();
 
 signals:
     void startCapturing(int, int);

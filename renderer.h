@@ -74,6 +74,8 @@ signals:
     void finishedPixelCalculation();
 
     void finishedSliceProcessing();
+
+    void finishedCapturingPoints();
 };
 
 #endif // RENDERER_H

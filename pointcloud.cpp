@@ -38,6 +38,22 @@ void PointCloud::meshify(int step)
     }
 }
 
+void PointCloud::saveToFile()
+{
+    std::ofstream _file;
+    _file.open("points.off", std::ofstream::out);
+
+    int _nVertices = height*frames;
+
+    _file << "OFF\n" << _nVertices << "\t" << 0 << "\t" << 0 << endl;
+
+    for (auto it = cloud.begin(); it != cloud.end(); ++it) {
+        _file << it->x << "\t" << it->y << "\t" << it->z << endl;
+    }
+
+    _file.close();
+}
+
 Polygon::Polygon(Point3D *e1, Point3D *e2, Point3D *e3, Point3D *e4) :
     edge_1(e1),
     edge_2(e2),
