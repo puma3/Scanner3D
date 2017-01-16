@@ -6,7 +6,7 @@ PCLViewer::PCLViewer (QWidget *parent) :
   ui (new Ui::PCLViewer)
 {
   ui->setupUi (this);
-  this->setWindowTitle ("PCL viewer");
+  this->setWindowTitle ("Mesher");
 
   // Setup the cloud pointer
   m_cloud.reset (new PointCloudT);
