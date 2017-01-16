@@ -1,7 +1,7 @@
 #include "renderer.h"
 #include "ui_renderer.h"
 
-#define _WORKING_WITH_FILES_
+//#define _WORKING_WITH_FILES_
 
 Renderer::Renderer(VideoCapture *capturer, int *_brightestPixls, QWidget *parent) :
     QDialog(parent),
